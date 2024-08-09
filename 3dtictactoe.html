@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>3D Tic-Tac-Toe with Anaglyph</title>
+<style>
+  canvas {
+    width: 400px;
+    height: 400px;
+    border: 1px solid black;
+  }
+</style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const boardSize = 3;
+    const cellSize = canvas.width / boardSize;
+    let board = Array.from({ length: boardSize }, () => Array(boardSize).fill(null));
+    let currentPlayer = "X";
+
+    function drawBoard() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw grid
+      ctx.strokeStyle = "black";
+      for (let i = 1; i < boardSize; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * cellSize, 0);
+        ctx.lineTo(i * cellSize, canvas.height);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(0, i * cellSize);
+        ctx.lineTo(canvas.width, i * cellSize);
+        ctx.stroke();
+      }
+    }
+
+    function draw3DCross(x, y, color) {
+      const centerX = x * cellSize + cellSize / 2;
+      const centerY = y * cellSize + cellSize / 2;
+      const size = cellSize / 3;
+      const depth = size / 4; // Adjust for 3D effect
+
+      const points = [
+        [centerX - size, centerY - size, -depth],
+        [centerX + size, centerY + size, -depth],
+        [centerX - size, centerY + size, -depth],
+        [centerX + size, centerY - size, -depth],
+
+        [centerX - size, centerY - size, depth],
+        [centerX + size, centerY + size, depth],
+        [centerX - size, centerY + size, depth],
+        [centerX + size, centerY - size, depth]
+      ];
+
+      const edges = [
+        [0, 1], [2, 3], 
+        [4, 5], [6, 7],
+        [0, 4], [1, 5], [2, 6], [3, 7]
+      ];
+
+      edges.forEach(edge => {
+        const p1 = points[edge[0]];
+        const p2 = points[edge[1]];
+
+        const x1 = p1[0];
+        const y1 = p1[1];
+        const x2 = p2[0];
+        const y2 = p2[1];
+
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      });
+    }
+
+    function draw3DCircle(x, y, color) {
+      const centerX = x * cellSize + cellSize / 2;
+      const centerY = y * cellSize + cellSize / 2;
+      const radius = cellSize / 3;
+      const depth = radius / 4;
+
+      for (let i = 0; i < 360; i += 10) {
+        const angle1 = i * Math.PI / 180;
+        const angle2 = (i + 10) * Math.PI / 180;
+
+        const x1 = centerX + radius * Math.cos(angle1);
+        const y1 = centerY + radius * Math.sin(angle1);
+        const x2 = centerX + radius * Math.cos(angle2);
+        const y2 = centerY + radius * Math.sin(angle2);
+
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+
+        const x3 = centerX + (radius - depth) * Math.cos(angle1);
+        const y3 = centerY + (radius - depth) * Math.sin(angle1);
+        const x4 = centerX + (radius - depth) * Math.cos(angle2);
+        const y4 = centerY + (radius - depth) * Math.sin(angle2);
+
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.moveTo(x3, y3);
+        ctx.lineTo(x4, y4);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x3, y3);
+        ctx.stroke();
+      }
+    }
+
+    function drawPieces() {
+      for (let i = 0; i < boardSize; i++) {
+        for (let j = 0; j < boardSize; j++) {
+          if (board[i][j] === "X") {
+            draw3DCross(j, i, "cyan"); // Left eye (cyan)
+            draw3DCross(j, i, "red");  // Right eye (red), slightly offset
+          } else if (board[i][j] === "O") {
+            draw3DCircle(j, i, "cyan");
+            draw3DCircle(j, i, "red"); 
+          }
+        }
+      }
+    }
+
+    // ... (Rest of the game logic for checking wins, handling clicks, etc.)
+  </script>
+</body>
+</html>
+

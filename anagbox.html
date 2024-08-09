@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Rotating Cube with Anaglyph 3D</title>
+<style>
+  canvas {
+    width: 400px;
+    height: 400px;
+    border: 1px solid black;
+  }
+</style>
+</head>
+<body>
+  <canvas id="cubeCanvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById("cubeCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const vertices = [
+      [-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
+      [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]
+    ];
+
+    const edges = [
+      [0, 1], [1, 2], [2, 3], [3, 0], 
+      [4, 5], [5, 6], [6, 7], [7, 4],
+      [0, 4], [1, 5], [2, 6], [3, 7]
+    ];
+
+    let angle = 0;
+
+    function project(vertex) {
+      const focalLength = 5;
+      const eyeSeparation = 0.3; // Adjust for 3D effect
+
+      const x = vertex[0];
+      const y = vertex[1];
+      const z = vertex[2];
+
+      // Left eye projection
+      const leftX = (x - eyeSeparation / 2) * focalLength / (z + focalLength);
+      const leftY = y * focalLength / (z + focalLength);
+
+      // Right eye projection
+      const rightX = (x + eyeSeparation / 2) * focalLength / (z + focalLength);
+      const rightY = y * focalLength / (z + focalLength);
+
+      return [
+        [leftX * 100 + 200, leftY * 100 + 200], // Scale and center
+        [rightX * 100 + 200, rightY * 100 + 200]
+      ];
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Rotate vertices
+      const rotatedVertices = vertices.map(vertex => {
+        const x = vertex[0];
+        const y = vertex[1];
+        const z = vertex[2];
+
+        const rad = angle * Math.PI / 180;
+        const cos = Math.cos(rad);
+        const sin = Math.sin(rad);
+
+        const rotatedX = x * cos - z * sin;
+        const rotatedZ = x * sin + z * cos;
+
+        return [rotatedX, y, rotatedZ];
+      });
+
+      // Draw edges
+      edges.forEach(edge => {
+        const projected1 = project(rotatedVertices[edge[0]]);
+        const projected2 = project(rotatedVertices[edge[1]]);
+
+        // Left eye (cyan)
+        ctx.beginPath();
+        ctx.strokeStyle = "cyan";
+        ctx.moveTo(projected1[0][0], projected1[0][1]);
+        ctx.lineTo(projected2[0][0], projected2[0][1]);
+        ctx.stroke();
+
+        // Right eye (red)
+        ctx.beginPath();
+        ctx.strokeStyle = "red";
+        ctx.moveTo(projected1[1][0], projected1[1][1]);
+        ctx.lineTo(projected2[1][0], projected2[1][1]);
+        ctx.stroke();
+      });
+
+      angle += 6; // 10 RPM = 6 degrees per frame (60 frames per second assumed)
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+  </script>
+</body>
+</html>
