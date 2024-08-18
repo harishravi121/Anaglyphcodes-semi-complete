@@ -1,3 +1,5 @@
+#3d game under development
+
 import pygame
 from pygame.locals import *
 import numpy as np
