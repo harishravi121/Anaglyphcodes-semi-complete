@@ -6,3 +6,6 @@ Plan to pursue this Aug-Dec 2024 or longer..
 
 
 We can even make Operating system with this ...
+
+
+There is also a anaglyph 2 video joiner..
